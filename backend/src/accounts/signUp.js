@@ -1,46 +1,45 @@
-const express = require('express');
-const { MongoClient } = require('mongodb');
+import dotenv from "dotenv";
+import express from "express";
+import mongoose from "mongoose";
+
+dotenv.config();
+
+mongoose.connect(`mongodb+srv://GabrielCapovilla:${process.env.MONGO_PASSWORD}@projeto-feedapi.3ea7w.mongodb.net/?retryWrites=true&w=majority&appName=projeto-feedAPI`);
+
+const AccountsModel = mongoose.model('Account', {
+    completeName: String,
+    username: String,
+    password: String,
+    birthDate: String
+});
+
 const router = express.Router();
 
-const url = 'mongodb://localhost:27017';
-const dbName = 'feedData';
 
-async function conectarMongodb(){
-    const client = new MongoClient(url);
+async function signUp(nome,nomeUsuario,senha,data_nasc){
+    const newAccount = new AccountsModel({
+        completeName: nome,
+        username: nomeUsuario,
+        password: senha,
+        birthDate: data_nasc
+    });
 
-    try{
-        await client.connect();
-        console.log('Conectado ao MongoDB com sucesso');
-
-        const db = client.db(dbName);
-        const colecao = db.collection('accounts');
-        return colecao;
-
-    }catch(error){
-        console.error('Erro ao conectar ao MongoDB:', erro);
-    }
+    await newAccount.save();
+    console.log("conta criada com sucesso:",newAccount);
 }
 
-async function signUp(nome,senha){
-    
-    colecao = await conectarMongodb();
-    const insert = await colecao.insertOne({
-        Nome:nome,
-        Senha:senha
-    })
-   
-    console.log("conta criada com sucesso:",insert);
-}
-
-const signUpHandler = router.get('/', async (req,res) => {
+export const signUpHandler = router.get('/', async (req,res) => {
     
     const pNome = req.get('nome');
+    const pNomeUsuario = req.get('username');
     const pSenha = req.get('senha');
+    const pbirthDate = req.get('data_nasc');
+
     try{
-        if(pNome && pSenha){
-            await signUp(pNome,pSenha);
+        if(pNome && pNomeUsuario && pSenha && pbirthDate){
+            await signUp(pNome,pNomeUsuario,pSenha,pbirthDate);
             res.statusCode = 200;
-            res.send('Conta criada com sucesso');
+            res.send('Conta criada com sucesso!!');
         }else{
             res.statusCode = 400;
             res.send('Parametros invalidos ou faltantes.');
@@ -50,6 +49,4 @@ const signUpHandler = router.get('/', async (req,res) => {
         res.status(500).send('Erro ao criar a conta.');
     }
     
-})
-
-module.exports = signUpHandler;
+});
