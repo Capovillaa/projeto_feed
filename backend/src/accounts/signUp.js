@@ -13,9 +13,6 @@ const AccountsModel = mongoose.model('Account', {
     birthDate: String
 });
 
-const router = express.Router();
-
-
 async function signUp(nome,nomeUsuario,senha,data_nasc){
     const newAccount = new AccountsModel({
         completeName: nome,
