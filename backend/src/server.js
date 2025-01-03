@@ -8,6 +8,7 @@ const port = 3000;
 server.get('/', (req, res) => {
     res.statusCode = 403;
     console.log('Rota default nao permitida');
+    res.send("Acesso negado")
 })
 
 server.use('/signUp',signUpHandler);
